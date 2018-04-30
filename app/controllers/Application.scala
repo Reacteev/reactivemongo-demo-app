@@ -25,37 +25,14 @@ import javax.inject.Inject
 class Application @Inject() (
   components: ControllerComponents,
   val reactiveMongoApi: ReactiveMongoApi
-)(
-  implicit
-  system: ActorSystem,
-  ec: ExecutionContext,
-  mat: Materializer
-)
-  extends AbstractController(components)
-  with MongoController with ReactiveMongoComponents {
+)(implicit system: ActorSystem, ec: ExecutionContext, mat: Materializer)
+  extends AbstractController(components) with MongoController with ReactiveMongoComponents {
 
-  // let's be sure that the collections exists and is capped
-  val futureCollection: Future[JSONCollection] = {
-    val collection: Future[JSONCollection] = reactiveMongoApi.database.map(_.collection[JSONCollection]("acappedcollection"))
-
-    (for {
-      coll <- collection
-      stats <- coll.stats()
-    } yield {
-      if (stats.capped) coll else {
-        // the collection is not capped, so we convert it
-        println("converting to capped")
-        coll.convertToCapped(1024 * 1024, None)
-      }
-    }) recover {
-      case _ =>
-        println("creating capped collection...")
-        collection.map(_.createCapped(1024 * 1024, None))
-    } flatMap { _ =>
-      println("the capped collection is available")
-      collection
-    }
-  }
+  val futureCollection: Future[JSONCollection] = for {
+    collection <- reactiveMongoApi.database.map(_.collection[JSONCollection]("acappedcollection"))
+    _ <- collection.drop(false)
+    _ <- collection.createCapped(1024 * 1024, None)
+  } yield collection
 
   def index = Action {
     Ok(views.html.index())
