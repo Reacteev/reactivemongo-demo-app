@@ -20,7 +20,8 @@ function init() {
     websocket.send(JSON.stringify(doc));
     evt.stopPropagation();
     evt.preventDefault();
-  })
+  });
+  document.getElementById("content").focus();
 }
 
 function testWebSocket() {
@@ -40,7 +41,7 @@ function onClose(evt) {
 function onMessage(evt) {
   var event = JSON.parse(evt.data);
   writeToScreen('<span class="mongo-message">' + new Date().toLocaleString() + ': ' + evt.data +'</span>');
-  writeMessage('<span><b>' + event.author + '</b> [' + dateFromObjectId(event._id).toLocaleString() + '] <br><span class="user-message">' + (event.content || '') +'</span></span>');
+  writeMessage('<span><span class="author">' + event.author + '</span> [' + dateFromObjectId(event._id).toLocaleString() + '] <br><span class="user-message">' + (event.content || '') +'</span></span>');
 }
 function onError(evt) {
   writeToScreen('<span class="error-message">ERROR:</span> ' + evt.data);
