@@ -9,18 +9,18 @@ function init() {
   log = document.getElementById("log");
   testWebSocket();
   document.getElementById("message").addEventListener("submit", function(evt) {
-    var title = document.getElementById("title");
     var content = document.getElementById("content");
-    var doc = { author: author };
-    if (title && title.value && title.value.length > 0) doc.title = title.value;
     if (content && content.value && content.value.length > 0) {
-      doc.content = content.value;
+      var doc = {
+        author: author,
+        content: content.value
+      };
       content.value = "";
+      websocket.send(JSON.stringify(doc));
+      content.focus();
     }
-    websocket.send(JSON.stringify(doc));
     evt.stopPropagation();
     evt.preventDefault();
-    content.focus();
   });
   document.getElementById("content").focus();
 }
