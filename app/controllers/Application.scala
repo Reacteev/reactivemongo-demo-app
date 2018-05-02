@@ -28,16 +28,6 @@ class Application @Inject() (
 )(implicit system: ActorSystem, ec: ExecutionContext, mat: Materializer)
   extends AbstractController(components) with MongoController with ReactiveMongoComponents {
 
-  val futureCollection: Future[JSONCollection] = for {
-    collection <- reactiveMongoApi.database.map(_.collection[JSONCollection]("acappedcollection"))
-    _ <- collection.drop(false)
-    _ <- collection.createCapped(1024 * 1024, None)
-  } yield collection
-
-  def index = Action {
-    Ok(views.html.index())
-  }
-
   def watchCollection = WebSocket.accept[JsValue, JsValue] { request =>
     val in = Sink.foreach[JsValue] {
       case jsObj: JsObject => futureCollection.map(_.insert(jsObj))
@@ -54,4 +44,14 @@ class Application @Inject() (
 
     Flow.fromSinkAndSource(in, out)
   }
+
+  def index = Action {
+    Ok(views.html.index())
+  }
+
+  val futureCollection: Future[JSONCollection] = for {
+    collection <- reactiveMongoApi.database.map(_.collection[JSONCollection]("acappedcollection"))
+    _ <- collection.drop(false)
+    _ <- collection.createCapped(1024 * 1024, None)
+  } yield collection
 }

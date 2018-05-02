@@ -1,108 +1,33 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8" /> 
-		<title>MongoDB WebSocket streaming demo</title>
+  <head>
+    <meta charset="utf-8">
+    <meta name="language" content="en" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Content-Language" content="en" />
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MongoDB WebSocket streaming demo</title>
     <link id="favicon" rel="shortcut icon" href="/assets/images/favicon.png" sizes="16x16 32x32 48x48" type="image/png" />
-		<script language="javascript" type="text/javascript">
-			var wsUri = "wss://" + document.location.host + "/watchCollection";
-			var output;
-			function init() {
-				output = document.getElementById("output");
-				log = document.getElementById("log");
-				testWebSocket();
-				document.getElementById("message").addEventListener("submit", function(evt) {
-					var author = document.getElementById("author");
-          var title = document.getElementById("title");
-					var content = document.getElementById("content");
-					var doc = { author: author.value };
-          if (title && title.value && title.value.length > 0)
-            doc.title = title.value;
-          if (content && content.value && content.value.length > 0) {
-            doc.content = content.value;
-            content.value = "";
-          }
-					websocket.send(JSON.stringify(doc));
-					evt.stopPropagation();
-					evt.preventDefault();
-				})
-			}
-      function dateFromObjectId(objectId) {
-        return new Date(parseInt(objectId.substring(0, 8), 16) * 1000);
-      }
-			function testWebSocket() {
-				websocket = new WebSocket(wsUri);
-				websocket.onopen = function(evt) { onOpen(evt) };
-				websocket.onclose = function(evt) { onClose(evt) };
-				websocket.onmessage = function(evt) { onMessage(evt) };
-				websocket.onerror = function(evt) { onError(evt) };
-			}
-			function onOpen(evt) {
-				writeToScreen("CONNECTED");
-			}
-			function onClose(evt) { writeToScreen("DISCONNECTED"); }
-			function onMessage(evt) {
-			  var event = JSON.parse(evt.data);
-			  writeToScreen('<span style="color: blue;">' + new Date().toLocaleString() + ': ' + evt.data +'</span>');
-			  writeMessage('<span><b>' + event.author + '</b> [' + dateFromObjectId(event._id['$oid']).toLocaleString() + '] <br><span style="white-space: pre-line;">' + (event.content || '') +'</span></span>');
-			}
-			function onError(evt) { writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data); }
-			function doSend(message) { writeToScreen("SENT: " + message);  websocket.send(message); }
-			function writeToScreen(message) {
-			  var pre = document.createElement("p");
-			  pre.style.wordWrap = "break-word";
-			  pre.innerHTML = message;
-			  log.insertBefore(pre, log.firstChild);
-			}
-      function writeMessage(message) {
-        var pre = document.createElement("p");
-        pre.style.wordWrap = "break-word";
-        pre.innerHTML = message;
-        output.appendChild(pre);
-        output.scrollTo(0, output.scrollHeight);
-      }
-			window.addEventListener("load", init, false);
-		</script>
-		<style type="text/css">
-      * { box-sizing: border-box; }
-      body { padding: 0; margin: 0; font-family: Helvetica, Arial, sans-serif; }
-      h3 { margin: 0; text-align: center; }
-      .container { position: absolute; top: 3%; bottom: 3%; left: 3%; right: 3%; }
-			label { display: block; width: 150px; margin: 10px 0 5px; }
-      input { width: 100%; margin: 0; }
-      input#author, input#submit { display: inline-block; width: 45%; margin: 10px 2% 0; text-align: left; }
-      input#submit { text-align: center; }
-			#message {position: absolute; bottom: 0; left: 0; right: 0; padding: 15px; border-top: #bfbfbf 1px solid; text-align: center; }
-			#outputWrapper { position: absolute; width: 100%; height: 73%; top: 0; left: 0; padding: 15px; border: #bfbfbf 1px solid; box-shadow: #bfbfbf 5px 5px 5px; }
-      #output { position: absolute; top: 40px; bottom: 100px; left: 15px; right: 15px; overflow: scroll; }
-      .spacer { position: absolute; width: 100%; height: 2%; top: 73%; left: 0; }
-      #logWrapper { position: absolute; width: 100%; height: 25%; top: 75%; left: 0; overflow: scroll; padding: 0 15px; border: #bfbfbf 1px solid; box-shadow: #bfbfbf 5px 5px 5px; }
-		</style>
-	</head>
-	<body>
-		<div class="container">
-      @*
+    <script language="javascript" type="text/javascript" src="/assets/js/main.js"></script>
+    <link rel="stylesheet" href="/assets/css/main.css" />
+  </head>
+  <body>
+    <div class="container">
+    <div id="outputWrapper">
+      <h3>Messages</h3>
+      <div id="output"></div>
       <form id="message">
-      <h2>Create a message</h2>
-      <label for="author">Your name</label><input id="author" name="author" type="text" placeholder="Your name" />
-      <label for="title">Title</label><input id="title" name="title" type="text" placeholder="Title" />
-      <label for="content">Content</label><textarea id="content" name="content"></textarea>
-      <input id="submit" type="submit" />
+        @*<input id="title" name="title" type="text" placeholder="Title" />*@
+        <input id="content" name="content" type="text" placeholder="Your message"></input>
+        <input id="submit" type="submit" value=" > " />
       </form>
-      *@
-      <div id="outputWrapper">
-        <h3>Messages</h3>
-        <div id="output"></div>
-        <form id="message">
-          @*<input id="title" name="title" type="text" placeholder="Title" />*@
-          <input id="content" name="content" type="text" placeholder="Your message"></input>
-          <input id="author" name="author" type="text" placeholder="Your name" />
-          <input id="submit" type="submit" value="Envoyer" />
-        </form>
-      </div>
-      <div id="logWrapper">
-        <div id="log"></div>
-      </div>
     </div>
-	</body>
+    <div id="logWrapper">
+      <div id="log"></div>
+    </div>
+    </div>
+  </body>
 </html>

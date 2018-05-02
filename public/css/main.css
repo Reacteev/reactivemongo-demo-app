@@ -1,0 +1,17 @@
+* { box-sizing: border-box; }
+body { padding: 0; margin: 0; font-family: Helvetica, Arial, sans-serif; }
+h3 { margin: 0; text-align: center; }
+p { word-wrap: break-word; }
+.container { position: absolute; top: 3%; bottom: 3%; left: 3%; right: 3%; }
+label { display: block; width: 150px; margin: 10px 0 5px; }
+input { display: inline-block; }
+input#content { position: absolute; top: 20px; left: 10px; right: 70px; }
+input#submit { float: right; width: 50px; text-align: center; }
+#message { position: absolute; bottom: 0; left: 0; right: 0; padding: 15px; border-top: #bfbfbf 1px solid; text-align: center; }
+#outputWrapper { position: absolute; width: 100%; height: 73%; top: 0; left: 0; padding: 15px; border: #bfbfbf 1px solid; border-radius: 4px; box-shadow: #bfbfbf 5px 5px 5px; }
+#output { position: absolute; top: 40px; bottom: 100px; left: 15px; right: 15px; overflow: auto; }
+.spacer { position: absolute; width: 100%; height: 2%; top: 73%; left: 0; }
+#logWrapper { position: absolute; width: 100%; height: 25%; top: 75%; left: 0; overflow: auto; padding: 0 15px; border: #bfbfbf 1px solid; border-radius: 4px; box-shadow: #bfbfbf 5px 5px 5px; }
+.error-message { color: red; }
+.mongo-message { color: blue; }
+.user-message { white-space: pre-line; }
