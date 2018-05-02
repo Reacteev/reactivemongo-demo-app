@@ -13,9 +13,11 @@ function init() {
     if (content && content.value && content.value.length > 0) {
       var doc = {
         author: author,
-        content: content.value /*,
-        userAgent: window.navigator.userAgent */
+        content: content.value
       };
+      if (window.sendUserAgent === true)
+        doc.userAgent = window.navigator.userAgent;
+
       content.value = "";
       websocket.send(JSON.stringify(doc));
       // content.focus();
@@ -43,7 +45,7 @@ function onClose(evt) {
 function onMessage(evt) {
   var event = JSON.parse(evt.data);
   writeToScreen('<span class="mongo-message">' + new Date().toLocaleString() + ': ' + evt.data +'</span>');
-  writeMessage('<span>' + (event.author ? '<span class="author">' + event.author + '</span> ' : '') + '[' + dateFromObjectId(event._id).toLocaleString() + '] <br><span class="user-message">' + (event.content || '') +'</span></span>');
+  writeMessage('<span>' + renderAuthor(event.author) + renderDateFromObjectId(event._id) + renderContent(event.content) + '</span>');
 }
 function onError(evt) {
   writeToScreen('<span class="error-message">ERROR:</span> ' + evt.data);
@@ -60,8 +62,14 @@ function writeMessage(message) {
   output.appendChild(pre);
   output.scrollTo(0, output.scrollHeight);
 }
-function dateFromObjectId(objectId) {
-  return new Date(parseInt(objectId['$oid'].substring(0, 8), 16) * 1000);
+function renderDateFromObjectId(objectId) {
+  return '[' + (new Date(parseInt(objectId['$oid'].substring(0, 8), 16) * 1000)).toLocaleString() + '] <br>';
+}
+function renderAuthor(author) {
+  return author ? '<span class="author">' + author + '</span> ' : '';
+}
+function renderContent(content) {
+  return '<span class="user-message">' + (content || '') +'</span>';
 }
 
 window.addEventListener("load", init, false);
