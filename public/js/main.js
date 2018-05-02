@@ -13,7 +13,8 @@ function init() {
     if (content && content.value && content.value.length > 0) {
       var doc = {
         author: author,
-        content: content.value
+        content: content.value /*,
+        userAgent: window.navigator.userAgent */
       };
       content.value = "";
       websocket.send(JSON.stringify(doc));
@@ -26,7 +27,7 @@ function init() {
 }
 
 function testWebSocket() {
-  websocket = new WebSocket(wsUri);
+  websocket = new WebSocket(wsUri + '?author=' + author);
   websocket.onopen = function(evt) { onOpen(evt) };
   websocket.onclose = function(evt) { onClose(evt) };
   websocket.onmessage = function(evt) { onMessage(evt) };
@@ -42,7 +43,7 @@ function onClose(evt) {
 function onMessage(evt) {
   var event = JSON.parse(evt.data);
   writeToScreen('<span class="mongo-message">' + new Date().toLocaleString() + ': ' + evt.data +'</span>');
-  writeMessage('<span><span class="author">' + event.author + '</span> [' + dateFromObjectId(event._id).toLocaleString() + '] <br><span class="user-message">' + (event.content || '') +'</span></span>');
+  writeMessage('<span>' + (event.author ? '<span class="author">' + event.author + '</span> ' : '') + '[' + dateFromObjectId(event._id).toLocaleString() + '] <br><span class="user-message">' + (event.content || '') +'</span></span>');
 }
 function onError(evt) {
   writeToScreen('<span class="error-message">ERROR:</span> ' + evt.data);

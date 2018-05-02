@@ -17,6 +17,7 @@ import play.modules.reactivemongo.{ MongoController, ReactiveMongoApi, ReactiveM
 
 import reactivemongo.akkastream._
 import reactivemongo.api.QueryOpts
+import reactivemongo.api.commands.WriteResult
 import reactivemongo.play.json._
 import reactivemongo.play.json.collection._
 
@@ -29,20 +30,25 @@ class Application @Inject() (
   extends AbstractController(components) with MongoController with ReactiveMongoComponents {
 
   def watchCollection = WebSocket.accept[JsValue, JsValue] { request =>
-    val in = Sink.foreach[JsValue] {
-      case jsObj: JsObject => futureCollection.map(_.insert(jsObj))
-      case js              => sys.error(s"unexpected JSON value: $js")
-    }
+    val author = request getQueryString "author" getOrElse "Anonymous"
+    insert(Json.obj("content" -> s"$author has joined."))
 
-    val out = Source.fromFutureSource(futureCollection.map { collection =>
+    val in = Sink.foreach[JsValue] {
+      case jsObj: JsObject => insert(jsObj)
+      case js              => sys error s"unexpected JSON value: $js"
+    }.mapMaterializedValue(_.map { done =>
+      insert(Json.obj("content" -> s"$author has left."))
+      done
+    })
+    val out = Source fromFutureSource futureCollection.map { collection =>
       collection
         .find(Json.obj())
         .options(QueryOpts().tailable.awaitData)
         .cursor[JsObject]()
         .documentSource()
-    })
+    }
 
-    Flow.fromSinkAndSource(in, out)
+    Flow fromSinkAndSource (in, out)
   }
 
   def index = Action {
@@ -54,4 +60,8 @@ class Application @Inject() (
     _ <- collection.drop(false)
     _ <- collection.createCapped(1024 * 1024, None)
   } yield collection
+
+  @inline
+  def insert(jsObj: JsObject): Future[WriteResult] =
+    futureCollection flatMap (_ insert jsObj)
 }
