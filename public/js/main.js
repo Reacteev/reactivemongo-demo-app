@@ -20,6 +20,7 @@ function init() {
     websocket.send(JSON.stringify(doc));
     evt.stopPropagation();
     evt.preventDefault();
+    content.focus();
   });
   document.getElementById("content").focus();
 }
