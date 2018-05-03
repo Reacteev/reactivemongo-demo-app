@@ -1,4 +1,5 @@
 var wsUri = "wss://" + document.location.host + "/watchCollection";
+var sendUserAgent = false;
 var output;
 var author;
 
@@ -15,11 +16,11 @@ function init() {
         author: author,
         content: content.value
       };
-      if (window.sendUserAgent === true)
+      if (sendUserAgent === true)
         doc.userAgent = window.navigator.userAgent;
 
       content.value = "";
-      websocket.send(JSON.stringify(doc));
+      sendWebSocket(doc);
       content.focus();
     }
     evt.stopPropagation();
@@ -35,6 +36,9 @@ function testWebSocket() {
   websocket.onmessage = function(evt) { onMessage(evt) };
   websocket.onerror = function(evt) { onError(evt) };
 }
+function sendWebSocket(json) {
+  websocket.send(JSON.stringify(json));
+}
 
 function onOpen(evt) {
   writeToScreen("CONNECTED");
@@ -45,7 +49,10 @@ function onClose(evt) {
 function onMessage(evt) {
   var event = JSON.parse(evt.data);
   writeToScreen('<span class="mongo-message">' + new Date().toLocaleString() + ': ' + evt.data +'</span>');
-  writeMessage('<span>' + renderAuthor(event.author) + renderDateFromObjectId(event._id) + renderContent(event.content) + '</span>');
+  if (event.content)
+    writeMessage('<span>' + renderAuthor(event.author) + renderDateFromObjectId(event._id) + renderContent(event.content) + '</span>');
+  else if (typeof event.sendUserAgent === 'boolean')
+    sendUserAgent = event.sendUserAgent
 }
 function onError(evt) {
   writeToScreen('<span class="error-message">ERROR:</span> ' + evt.data);
@@ -62,6 +69,7 @@ function writeMessage(message) {
   output.appendChild(pre);
   output.scrollTo(0, output.scrollHeight);
 }
+
 function renderDateFromObjectId(objectId) {
   return '[' + (new Date(parseInt(objectId['$oid'].substring(0, 8), 16) * 1000)).toLocaleString() + '] <br>';
 }
