@@ -29,8 +29,7 @@ class Application @Inject() (
 )(implicit system: ActorSystem, ec: ExecutionContext, mat: Materializer)
   extends AbstractController(components) with MongoController with ReactiveMongoComponents {
 
-  def watchCollection = WebSocket.accept[JsValue, JsValue] { request =>
-    val author = request getQueryString "author" getOrElse "Anonymous"
+  def watchCollection(author: String) = WebSocket.accept[JsValue, JsValue] { _ =>
     insert(Json.obj("content" -> s"$author has joined."))
 
     val in = Sink.foreach[JsValue] {
@@ -40,6 +39,7 @@ class Application @Inject() (
       insert(Json.obj("content" -> s"$author has left."))
       done
     })
+
     val out = Source fromFutureSource futureCollection.map { collection =>
       collection
         .find(Json.obj())

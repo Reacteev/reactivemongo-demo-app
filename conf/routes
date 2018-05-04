@@ -4,7 +4,7 @@
 
 
 GET     /                           controllers.Application.index
-GET     /watchCollection            controllers.Application.watchCollection
+GET     /watchCollection            controllers.Application.watchCollection(author: String ?= "Anonymous")
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

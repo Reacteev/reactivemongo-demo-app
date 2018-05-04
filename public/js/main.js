@@ -5,6 +5,7 @@ var author;
 
 function init() {
   author = window.prompt("Your name", localStorage.getItem("name") || "") || "";
+  if (author === "") author = "Anonymous";
   localStorage.setItem("name", author);
   output = document.getElementById("output");
   log = document.getElementById("log");
