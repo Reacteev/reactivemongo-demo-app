@@ -1,8 +1,3 @@
-/*
- * Copyright 2012 Stephane Godbillon
- *
- * This sample is in the public domain.
- */
 package controllers
 
 import scala.concurrent.{ ExecutionContext, Future }
